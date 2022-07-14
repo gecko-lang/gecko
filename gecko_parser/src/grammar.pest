@@ -10,7 +10,8 @@ file                        =  { statements }
 statements                  = _{ SOI ~ statement* ~ EOI }
 
 // Code block 
-block                       = _{ LBRACE ~ NEWLINE* ~ statement* ~ RBRACE }
+code_block                  = _{ LBRACE ~ NEWLINE* ~ block ~ RBRACE }
+block                 			=  { statement* }
 
 // Modifiers
 external                    =  { "extern" }
@@ -22,7 +23,7 @@ small_statement             = _{ type_statement | return_statement | variable_in
 compound_statement          = _{ function_definition | function_declaration }
 
 // Compound Statement Grammars
-function_definition         =  { external? ~ "func" ~ identifier ~ "(" ~ typed_identifier_list ~ ")" ~ return_type ~ NEWLINE? ~ block }
+function_definition         =  { external? ~ "func" ~ identifier ~ "(" ~ typed_identifier_list ~ ")" ~ return_type ~ NEWLINE? ~ code_block }
 function_declaration        =  { external? ~ "func" ~ identifier ~ "(" ~ typed_identifier_list ~ ")" ~ return_type ~ ";" }
 
 // Small Statement Grammars
