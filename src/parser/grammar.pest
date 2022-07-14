@@ -1,0 +1,172 @@
+
+/* File
+ * 
+ * Root of the AST
+ * A list of statements
+ *
+ */
+
+file                        =  { statements }
+statements                  = _{ SOI ~ statement* ~ EOI }
+
+// Code block 
+block                       = _{ LBRACE ~ NEWLINE* ~ statement* ~ RBRACE }
+
+// Modifiers
+external                    =  { "extern" }
+
+// Statement Types
+statement                   = _{ NEWLINE* ~ ( simple_statement | compound_statement ) ~ NEWLINE* }
+simple_statement            = _{ small_statement ~ SEMICOLON }
+small_statement             = _{ type_statement | return_statement | variable_initialisation | variable_declaration | expression_statement }
+compound_statement          = _{ function_definition | function_declaration }
+
+// Compound Statement Grammars
+function_definition         =  { external? ~ "func" ~ identifier ~ "(" ~ typed_identifier_list ~ ")" ~ return_type ~ NEWLINE? ~ block }
+function_declaration        =  { external? ~ "func" ~ identifier ~ "(" ~ typed_identifier_list ~ ")" ~ return_type ~ ";" }
+
+// Small Statement Grammars
+expression_statement        =  { expression }
+return_statement            =  { ("return" | "<-") ~ expression }
+type_statement              =  { "type" ~ identifier ~ ":" ~ type_specifier }
+
+variable_declaration        =  { "let" ~ typed_identifier }
+variable_initialisation     =  { "let" ~ typed_identifier ~ "=" ~ expression }
+
+// Objects
+return_type                 =  { "->" ~ type_specifier }
+
+typed_identifier_list       =  { (typed_identifier ~ ( COMMA ~ typed_identifier )*)? }
+typed_identifier            =  { identifier ~ ":" ~ type_specifier }
+
+variable                    =  { identifier }
+
+expression                  =  { infix }
+infix                       = _{ expression_inner ~ (binary_operator ~ expression_inner)* }
+expression_inner            = _{ call | literal | unary | variable }
+unary                       =  { unary_operator ~ ( literal | variable ) }
+
+literal                     = _{ /* class_constructor | struct_constructor | array | */ byte | string | float | integer | boolean }
+
+// TODO: dotted and scopes
+// dotted                      =  { identifier }
+
+call                        =  { identifier ~ LPAREN ~ call_parameter_list* ~ RPAREN}
+call_parameter_list         =  { call_parameter ~ (COMMA ~ call_parameter)* }
+call_parameter              =  { expression }
+
+// Types
+type_specifier              = _{ data_type | immutable_type }
+immutable_type              =  { "!" ~ data_type }
+data_type                   = _{ type_name | array_type | pointer_type }
+
+pointer_type                =  { "*" ~ data_type}
+array_type                  =  { (LBRACKET ~ data_type ~ RBRACKET)
+                               | (LBRACKET ~ data_type ~ SEMICOLON ~ integer ~ RBRACKET) }
+
+type_name                   =  { "null" | "bool" | "byte" | "int" | "float" | "str" | defined_type }
+defined_type                =  { identifier }
+
+// Reserved Keywords
+WHITESPACE                  = _{ (" " | "\t" | "\r")+ }
+COMMENT                     = _{ comment_block | comment_line }
+comment_line                = @{ "//" ~ (!"\n" ~ ANY)* }
+comment_block               = @{"/*" ~ (!"*/" ~ ANY)* ~ "*/"}
+keyword                     =  { "let" | "func" | "return" | "extern" | "type" | "bool" | "int" | "float" | "str" | "char" | "true" | "false" | "null" }
+
+// Literals
+
+integer                     = ${ integer_hexadecimal_sigil | integer_octal_sigil | integer_binary_sigil | integer_decimal | integer_zero }
+integer_decimal             =  { '1'..'9' ~ ('0'..'9' | "_")* }
+integer_hexadecimal         =  { ('0'..'9' | 'a'..'f' | 'A'..'F') ~ ('0'..'9' | 'a'..'f' | 'A'..'F' | "_")* }
+integer_hexadecimal_sigil   = _{ "0x" ~ integer_hexadecimal }
+integer_octal               =  { ('0'..'7') ~ ('0'..'7' | "_" )* }
+integer_octal_sigil         = _{ "0o" ~ integer_octal }
+integer_binary              =  { ('0'..'1') ~ ('0'..'1' | "_")* }
+integer_binary_sigil        = _{ "0b" ~ integer_binary }
+integer_zero                =  { "0" }
+
+float                       = @{ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT* }
+identifier                  = @{ (!keyword ~ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")*) }
+
+string                      = ${ string_single_line }
+string_single_line          = _{ string_delimiter ~ string_content ~ string_delimiter }
+string_content              = ${ (string_escape | !(string_delimiter | "\\") ~ ANY)* }
+string_delimiter            = _{ "\"" }
+string_unicode              = _{ "u" ~ ('0'..'9' | 'a'..'f' | 'A'..'F'){4} }
+string_escape               = _{ "\\" ~ ("\"" | "\\" | "a" | "b" | "f" | "n" | "r" | "t" | "v" | string_unicode) }
+
+byte                        = @{ SINGLEQUOTE ~ ANY ~ SINGLEQUOTE}
+boolean                     =  { boolean_true | boolean_false }
+boolean_true                =  { "true" }
+boolean_false               =  { "false" }
+null                        =  { "null" }
+
+exponent                    =  { "**" }
+multiply                    =  { "*" }
+divide                      =  { "/" }
+modulus                     =  { "%" }
+plus                        =  { "+" }
+minus                       =  { "-" }
+shift_left                  =  { "<<" }
+shift_right                 =  { ">>" }
+less_than                   =  { "<" }
+less_than_or_equal          =  { "<=" }
+greater_than                =  { ">" }
+greater_than_or_equal       =  { ">=" }
+not_equal                   =  { "!=" }
+equal                       =  { "==" }
+logical_and                 =  { "&&" }
+logical_or                  =  { "||" }
+logical_not                 =  { "!" }
+bitwise_and                 =  { "&" }
+bitwise_or                  =  { "|" }
+bitwise_xor                 =  { "^" }
+assign                      =  { "=" }
+all_operators               = _{
+                                 exponent |
+                                 multiply | divide | modulus |
+                                 plus | minus |
+                                 shift_left | shift_right |
+                                 less_than_or_equal | less_than |
+                                 greater_than_or_equal | greater_than |
+                                 not_equal | equal |
+                                 logical_and | logical_or | logical_not |
+                                 bitwise_and | bitwise_or | bitwise_xor |
+                                 assign
+                                }
+binary_operator             = _{
+                                 exponent |
+                                 multiply | divide | modulus |
+                                 plus | minus |
+                                 shift_left | shift_right |
+                                 less_than_or_equal | less_than |
+                                 greater_than_or_equal | greater_than |
+                                 not_equal | equal |
+                                 logical_and | logical_or |
+                                 bitwise_and | bitwise_or | bitwise_xor
+                               }
+unary_operator              = _{ plus | minus | logical_not }
+
+assignment                  =  { equals | "+=" | "-=" | "*=" | "/=" | "%=" }
+equals                      =  { "=" }
+
+SEMICOLON                   = _{ ";" }
+COLON                       = _{ ":" }
+DOUBLECOLON                 = _{ "::" }
+COMMA                       = _{ "," }
+DOT                         = _{ "." }
+LBRACKET                    = _{ "[" }
+RBRACKET                    = _{ "]" }
+LPAREN                      = _{ "(" }
+RPAREN                      = _{ ")" }
+LBRACE                      = _{ "{" }
+RBRACE                      = _{ "}" }
+
+RARROW                      = { "->" }
+
+LANGLEBRACKET               = _{ "<" }
+RANGLEBRACKET               = _{ ">" }
+
+SINGLEQUOTE                 = _{ "'" }
+DOUBLEQUOTE                 = _{ "\"" }
