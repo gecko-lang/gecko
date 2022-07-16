@@ -17,7 +17,8 @@ pub use output::Output;
 pub mod file;
 pub use file::File;
 
+pub use crate::colored::*;
 
-
-
-
+pub trait Node {
+    fn display_tree(&self, indent: &mut String, is_last: bool) -> String;
+}

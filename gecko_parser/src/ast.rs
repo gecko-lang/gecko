@@ -1,8 +1,12 @@
+
 use crate::grammar::{GeckoParser, Rule};
 use crate::expression::*;
 use crate::statement::*;
 use crate::node::*;
+use crate::node;
 use crate::Token;
+
+use crate::colored::*;
 
 use pest_consume::Error;
 use pest_consume::match_nodes;
@@ -69,7 +73,7 @@ impl GeckoParser {
     fn block(input: Node) -> Result<Block> {
         let span: Span = Span::from_span(input.as_span());
         let mut lb: Option<Token> = None;
-        let mut stmts: Vec<Box<dyn Statement>> = vec!();
+        let mut stmts: Vec<Box<dyn node::Node>> = vec!();
         let mut rb: Option<Token> = None;
 
         for n in input.into_children().peekable() {
@@ -162,7 +166,7 @@ impl GeckoParser {
         ))
     }
 
-    fn function_definition(input: Node) -> Result<impl Statement> {
+    fn function_definition(input: Node) -> Result<impl node::Node> {
         let span: Span = Span::from_span(input.as_span());
         Ok(match_nodes!(input.into_children();
             [func_token(func_token), identifier(id), parameter_list(params), output(output), block(block)] => {
@@ -211,7 +215,7 @@ impl GeckoParser {
     fn file(input: Node) -> Result<File> {
         let span: Span = Span::from_span(input.as_span());
         let nodes = { input.into_children() };
-        let mut statements: Vec<Box<dyn Statement>> = Vec::new();
+        let mut statements: Vec<Box<dyn node::Node>> = Vec::new();
         for node in nodes {
             let rule = node.as_rule();
             match rule {
@@ -228,14 +232,24 @@ impl GeckoParser {
 }
 
 #[derive(Copy, Clone)]
-//#[derive(Debug)]
 pub struct LineColumn {
     line: usize,
     column: usize
 }
 
+impl LineColumn {
+    pub fn display_tree(&self, indent: &mut String, is_last: bool) -> String {
+        let marker = if is_last { String::from("└──") } else { String::from("├──") };
+        let mut output: String = format!("{}{}{}", indent, marker, "LineColumn".color("green"));
+        let indent: String = if is_last { (*indent).clone() + "    " } else { (*indent).clone() + "│   " };
+
+        output = format!("{}\n{}{}{}: {}", output, indent, "├──", "line".color("blue"), self.line);
+        output = format!("{}\n{}{}{}: {}", output, indent, "└──", "column".color("blue"), self.column);
+        output
+    }
+}
+
 #[derive(Copy, Clone)]
-//#[derive(Debug)]
 pub struct Span {
     start: LineColumn,
     end: LineColumn
@@ -250,6 +264,19 @@ impl Span {
             start: LineColumn{ line: start.0, column: start.1 },
             end: LineColumn{ line: end.0, column: end.1 }
         }
+    }
+
+    pub fn display_tree(&self, indent: &mut String, is_last: bool) -> String {
+        let marker = if is_last { String::from("└──") } else { String::from("├──") };
+        let mut output: String = format!("{}{}{}", indent, marker, "Span".color("green"));
+        let mut indent: String = if is_last { (*indent).clone() + "    " } else { (*indent).clone() + "│   " };
+
+        let start_tree: String = self.start.display_tree(&mut indent, false);
+        output = format!("{}\n{}{}{}: \n{}", output, indent, "├──", "start".color("blue"), start_tree);
+
+        let end_tree: String = self.end.display_tree(&mut indent, true);
+        output = format!("{}\n{}{}{}: \n{}", output, indent, "├──", "end".color("blue"), end_tree);
+        output
     }
 }
 

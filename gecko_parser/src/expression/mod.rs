@@ -7,5 +7,5 @@ pub use integer::Integer;
 pub use string::Str;
 
 pub trait Expression {
-    fn display(&self, indent: i16) -> String;
+
 }

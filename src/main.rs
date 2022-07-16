@@ -1,5 +1,8 @@
 extern crate gecko_parser;
-use gecko_parser::ast::parse_gecko;
+use gecko_parser::{
+    ast::parse_gecko,
+    node::Node
+};
 use std::{env, fs};
 
 fn main() {
@@ -18,11 +21,13 @@ fn main() {
 
     let source = fs::read_to_string(path)
         .expect("Unable to read source file.");
-    let ast = parse_gecko(&source);
-    match ast {
+    let file = parse_gecko(&source);
+    match file {
         Ok(_) => {
             println!("Successfully constructed AST.");
-            ast.unwrap().display(0);
+
+            let mut indent: String = String::from("");
+            println!("{}", file.unwrap().display_tree(&mut indent, true));
         },
         Err(e) => println!("Parsing Unsuccessful: \n {:?}", e)
     }

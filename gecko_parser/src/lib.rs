@@ -5,6 +5,8 @@ extern crate lazy_static;
 extern crate pest_derive;
 extern crate pest;
 
+extern crate colored;
+
 pub mod ast;
 pub mod error;
 pub mod grammar;

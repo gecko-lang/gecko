@@ -1,20 +1,29 @@
 
 use crate::ast::Span;
-use crate::statement::Statement;
+use crate::node::Node;
 
-//#[derive(Debug)]
+use crate::colored::*;
+
 pub struct File {
-    pub stmts: Vec<Box<dyn Statement>>,
+    pub stmts: Vec<Box<dyn Node>>,
     pub span: Option<Span>,
 }
 
-impl File {
-    pub fn display(&self, indent: i16) -> String {
-        let mut stmts = vec![String::from("File:")];
+// ├
+// ─
+// └
+// │
+
+impl Node for File {
+    fn display_tree(&self, indent: &mut String, _is_last: bool) -> String {
+        let mut output: String = format!("{}", "File\n".color("yellow").dimmed());
+        let mut indent: String = (*indent).clone();
+
         for stmt in &self.stmts {
-            stmts.push(stmt.display(indent));
-            stmts.push(String::from("\n"));
+            output = format!("{}{}\n", output, stmt.display_tree(&mut indent, false));
         }
-        stmts.concat()
+
+        output = format!("{}{}", output, self.span.unwrap().display_tree(&mut indent, true));
+        output
     }
 }
