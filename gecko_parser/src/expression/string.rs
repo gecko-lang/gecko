@@ -2,8 +2,8 @@ use crate::ast::Span;
 use crate::expression::Expression;
 
 pub struct Str {
-    pub span: Span,
-    pub string: String
+    pub string: String,
+    pub span: Span
 }
 
 impl Expression for Str {

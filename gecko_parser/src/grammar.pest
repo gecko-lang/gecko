@@ -10,35 +10,36 @@ file                        =  { statements }
 statements                  = _{ SOI ~ statement* ~ EOI }
 
 // Code block 
-code_block                  = _{ LBRACE ~ NEWLINE* ~ block ~ RBRACE }
-block                 			=  { statement* }
-
+block                       =  { lbrace ~ NEWLINE* ~ statement* ~ rbrace }
 // Modifiers
-external                    =  { "extern" }
+external                    =  { extern_token }
 
 // Statement Types
 statement                   = _{ NEWLINE* ~ ( simple_statement | compound_statement ) ~ NEWLINE* }
-simple_statement            = _{ small_statement ~ SEMICOLON }
+simple_statement            = _{ small_statement ~ semicolon }
 small_statement             = _{ type_statement | return_statement | variable_initialisation | variable_declaration | expression_statement }
 compound_statement          = _{ function_definition | function_declaration }
 
 // Compound Statement Grammars
-function_definition         =  { external? ~ "func" ~ identifier ~ "(" ~ typed_identifier_list ~ ")" ~ return_type ~ NEWLINE? ~ code_block }
-function_declaration        =  { external? ~ "func" ~ identifier ~ "(" ~ typed_identifier_list ~ ")" ~ return_type ~ ";" }
+function_definition         =  { external? ~ func_token ~ identifier ~ parameter_list ~ output ~ NEWLINE? ~ block }
+function_declaration        =  { external? ~ func_token ~ identifier ~ parameter_list ~ output ~ semicolon }
 
 // Small Statement Grammars
 expression_statement        =  { expression }
-return_statement            =  { ("return" | "<-") ~ expression }
-type_statement              =  { "type" ~ identifier ~ ":" ~ type_specifier }
+return_statement            =  { (return_token | larrow) ~ expression }
+type_statement              =  { type_token ~ identifier ~ colon ~ type_specifier }
 
-variable_declaration        =  { "let" ~ typed_identifier }
-variable_initialisation     =  { "let" ~ typed_identifier ~ "=" ~ expression }
+variable_declaration        =  { let_token ~ typed_identifier }
+variable_initialisation     =  { let_token ~ typed_identifier ~ equals ~ expression }
 
 // Objects
-return_type                 =  { "->" ~ type_specifier }
+output                 =  { rarrow ~ type_specifier }
 
-typed_identifier_list       =  { (typed_identifier ~ ( COMMA ~ typed_identifier )*)? }
-typed_identifier            =  { identifier ~ ":" ~ type_specifier }
+parameter_list              =  { lparen ~ (parameter ~ ( comma ~ parameter )*)? ~ rparen }
+parameter                   =  { typed_identifier }
+
+typed_identifier_list       = _{ (typed_identifier ~ ( comma ~ typed_identifier )*)? }
+typed_identifier            = _{ identifier ~ colon ~ type_specifier }
 
 variable                    =  { identifier }
 
@@ -52,28 +53,35 @@ literal                     = _{ /* class_constructor | struct_constructor | arr
 // TODO: dotted and scopes
 // dotted                      =  { identifier }
 
-call                        =  { identifier ~ LPAREN ~ call_parameter_list* ~ RPAREN}
-call_parameter_list         =  { call_parameter ~ (COMMA ~ call_parameter)* }
+call                        =  { identifier ~ lparen ~ call_parameter_list* ~ rparen}
+call_parameter_list         =  { call_parameter ~ (comma ~ call_parameter)* }
 call_parameter              =  { expression }
 
 // Types
 type_specifier              = _{ data_type | immutable_type }
-immutable_type              =  { "!" ~ data_type }
+immutable_type              =  { logical_not ~ data_type }
 data_type                   = _{ type_name | array_type | pointer_type }
 
-pointer_type                =  { "*" ~ data_type}
-array_type                  =  { (LBRACKET ~ data_type ~ RBRACKET)
-                               | (LBRACKET ~ data_type ~ SEMICOLON ~ integer ~ RBRACKET) }
+pointer_type                =  { star ~ data_type}
+array_type                  =  { (lbracket ~ data_type ~ rbracket)
+                               | (lbracket ~ data_type ~ semicolon ~ integer ~ rbracket) }
 
-type_name                   =  { "null" | "bool" | "byte" | "int" | "float" | "str" | defined_type }
-defined_type                =  { identifier }
+type_name                   = _{ identifier }
 
 // Reserved Keywords
 WHITESPACE                  = _{ (" " | "\t" | "\r")+ }
 COMMENT                     = _{ comment_block | comment_line }
 comment_line                = @{ "//" ~ (!"\n" ~ ANY)* }
 comment_block               = @{"/*" ~ (!"*/" ~ ANY)* ~ "*/"}
-keyword                     =  { "let" | "func" | "return" | "extern" | "type" | "bool" | "int" | "float" | "str" | "char" | "true" | "false" | "null" }
+keyword                     =  { let_token | func_token | return_token | extern_token | type_token }
+
+let_token                   =  { "let" }
+func_token                  =  { "func" }
+type_token                  =  { "type" }
+return_token                =  { "return" }
+extern_token                =  { "extern" }
+
+
 
 // Literals
 
@@ -97,7 +105,7 @@ string_delimiter            = _{ "\"" }
 string_unicode              = _{ "u" ~ ('0'..'9' | 'a'..'f' | 'A'..'F'){4} }
 string_escape               = _{ "\\" ~ ("\"" | "\\" | "a" | "b" | "f" | "n" | "r" | "t" | "v" | string_unicode) }
 
-byte                        = @{ SINGLEQUOTE ~ ANY ~ SINGLEQUOTE}
+byte                        = @{ singlequote ~ ANY ~ singlequote}
 boolean                     =  { boolean_true | boolean_false }
 boolean_true                =  { "true" }
 boolean_false               =  { "false" }
@@ -152,22 +160,24 @@ unary_operator              = _{ plus | minus | logical_not }
 assignment                  =  { equals | "+=" | "-=" | "*=" | "/=" | "%=" }
 equals                      =  { "=" }
 
-SEMICOLON                   = _{ ";" }
-COLON                       = _{ ":" }
-DOUBLECOLON                 = _{ "::" }
-COMMA                       = _{ "," }
-DOT                         = _{ "." }
-LBRACKET                    = _{ "[" }
-RBRACKET                    = _{ "]" }
-LPAREN                      = _{ "(" }
-RPAREN                      = _{ ")" }
-LBRACE                      = _{ "{" }
-RBRACE                      = _{ "}" }
+star                        =  { "*" }
+semicolon                   =  { ";" }
+colon                       =  { ":" }
+double_colon                =  { "::" }
+comma                       =  { "," }
+dot                         =  { "." }
+lbracket                    =  { "[" }
+rbracket                    =  { "]" }
+lparen                      =  { "(" }
+rparen                      =  { ")" }
+lbrace                      =  { "{" }
+rbrace                      =  { "}" }
 
-RARROW                      = { "->" }
+rarrow                      =  { "->" }
+larrow                      =  { "<-"}
 
-LANGLEBRACKET               = _{ "<" }
-RANGLEBRACKET               = _{ ">" }
+langlebracket               =  { "<" }
+ranglebracket               =  { ">" }
 
-SINGLEQUOTE                 = _{ "'" }
-DOUBLEQUOTE                 = _{ "\"" }
+singlequote                 =  { "'" }
+doublequote                 =  { "\"" }

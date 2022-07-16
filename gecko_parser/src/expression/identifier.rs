@@ -2,8 +2,8 @@ use crate::ast::Span;
 use crate::expression::Expression;
 
 pub struct Identifier {
-    pub span: Span,
-    pub name: String
+    pub name: String,
+    pub span: Span
 }
 
 impl Expression for Identifier {
