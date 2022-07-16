@@ -75,7 +75,7 @@ impl GeckoParser {
         for n in input.into_children().peekable() {
             match n.as_rule() {
                 Rule::lbrace => lb = Some(GeckoParser::lbrace(n).unwrap()),
-                Rule::rbrace => rb = Some(GeckoParser::lbrace(n).unwrap()),
+                Rule::rbrace => rb = Some(GeckoParser::rbrace(n).unwrap()),
 
                 Rule::function_definition => stmts.push(Box::new(GeckoParser::function_definition(n).unwrap())),
                 _ => {}
@@ -125,10 +125,12 @@ impl GeckoParser {
                     next_param = None;
                 },
                 Rule::rparen => {
-                    assert_ne!(next_param.is_none(), true);
-
-                    params.push((next_param.unwrap(), None));
-                    next_param = None;
+                    if params.len() > 0 {
+                        assert_eq!(next_param.is_none(), false);
+                        params.push((next_param.unwrap(), None));
+                        next_param = None;
+                    }
+                    
                     rp = Some(GeckoParser::rparen(n).unwrap());
                 },
                 _ => {}
@@ -213,7 +215,7 @@ impl GeckoParser {
         for node in nodes {
             let rule = node.as_rule();
             match rule {
-                Rule::EOI => println!("end of input"),
+                Rule::EOI => {},
                 Rule::function_definition => statements.push(Box::new(Self::function_definition(node)?)),
                 // Rule::import_statement => statements.push(Box::new(Self::import_statement(node)?)),
                 // Rule::use_statement => statements.push(Box::new(Self::use_statement(node)?)),
@@ -221,20 +223,19 @@ impl GeckoParser {
             }
         }
 
-        for statement in &statements {
-            println!("{}", statement.display());
-        }
         Ok(File{ stmts: statements, span: Some(span) })
     }
 }
 
 #[derive(Copy, Clone)]
+//#[derive(Debug)]
 pub struct LineColumn {
     line: usize,
     column: usize
 }
 
 #[derive(Copy, Clone)]
+//#[derive(Debug)]
 pub struct Span {
     start: LineColumn,
     end: LineColumn

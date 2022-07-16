@@ -11,8 +11,8 @@ fn main() {
     }
 
     let path = &args[1];
-    if !path.ends_with(".syt") {
-        println!("File specified was not a .syt source file.");
+    if !path.ends_with(".gk") {
+        println!("File specified was not a Gecko (.gk) source file.");
         return;
     }
 
@@ -20,7 +20,10 @@ fn main() {
         .expect("Unable to read source file.");
     let ast = parse_gecko(&source);
     match ast {
-        Ok(_) => println!("working"),
-        Err(e) => println!("{:?}", e)
+        Ok(_) => {
+            println!("Successfully constructed AST.");
+            ast.unwrap().display(0);
+        },
+        Err(e) => println!("Parsing Unsuccessful: \n {:?}", e)
     }
 }

@@ -6,7 +6,7 @@ pub struct Token {
 }
 
 impl Token {
-    fn display(&self) -> String {
+    pub fn display(&self, indent: i16) -> String {
         return String::from(self.value.to_string());
     } 
 }

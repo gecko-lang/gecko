@@ -10,3 +10,10 @@ pub struct Block {
     pub rbrace: Token,
     pub span: Span,
 }
+
+impl Block {
+    pub fn display(&self) -> String {
+        // TODO: Display all statements within a block
+        String::from("{ . . . }")
+    }
+}

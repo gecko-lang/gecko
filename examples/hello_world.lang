@@ -1,6 +1,0 @@
-import <std>, random;
-use std::console;
-
-func main() -> i32 {
-	0;
-}

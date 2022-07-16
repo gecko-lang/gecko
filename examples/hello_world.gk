@@ -1,0 +1,10 @@
+// import <std>, random;
+// use std::console;
+
+func hello_world() -> str {
+	
+}
+
+func main() -> i32 {
+	// 0;
+}

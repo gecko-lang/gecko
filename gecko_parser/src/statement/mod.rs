@@ -4,5 +4,5 @@ pub use function_definition::FunctionDefinition;
 pub use function_definition::Signature;
 
 pub trait Statement {
-    fn display(&self) -> String;
+    fn display(&self, indent: i16) -> String;
 }
