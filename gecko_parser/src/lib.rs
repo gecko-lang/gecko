@@ -14,5 +14,6 @@ pub mod statement;
 pub mod token;
 pub mod expression;
 pub mod node;
+pub mod precedence;
 
 pub use token::Token;

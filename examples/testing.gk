@@ -1,0 +1,23 @@
+import <std>;
+use std::iostream::(stdout);
+
+interface Stream<T> {
+    public proc __stream__(value: T) -> void;
+}
+
+class TokenStream impl Stream<std::String> {
+    public output: [std::String];
+
+    proc __init__() {
+
+    }
+
+    public proc __stream__(item: std::String) ->  {
+        output.push()
+    }   
+}
+
+#[entry]
+proc main() -> int {
+    stdout << "Hi World";
+}

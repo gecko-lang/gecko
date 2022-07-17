@@ -17,6 +17,9 @@ pub use output::Output;
 pub mod file;
 pub use file::File;
 
+pub mod term;
+pub use term::Term;
+
 pub use crate::colored::*;
 
 pub trait Node {

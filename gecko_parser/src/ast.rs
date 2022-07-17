@@ -8,9 +8,8 @@ use crate::Token;
 
 use crate::colored::*;
 
-use pest_consume::Error;
-use pest_consume::match_nodes;
-use pest_consume::Parser;
+use crate::precedence::*;
+use pest_consume::{Error, match_nodes, Parser};
 
 type Result<T> = std::result::Result<T, Error<Rule>>;
 type Node<'i> = pest_consume::Node<'i, Rule, ()>;
@@ -20,6 +19,7 @@ fn token_from_node(input: Node) -> Result<Token> {
     Ok(Token{ span, value: String::from(input.as_str().to_owned()) })
 }
 
+// Gecko Parser derived from PEST
 #[pest_consume::parser]
 impl GeckoParser {
     fn EOI(_input: Node) -> Result<()> {
@@ -28,7 +28,7 @@ impl GeckoParser {
 
     // Tokens
     fn let_token(input: Node) -> Result<Token> { token_from_node(input) }
-    fn func_token(input: Node) -> Result<Token> { token_from_node(input) }
+    fn proc_token(input: Node) -> Result<Token> { token_from_node(input) }
     fn type_token(input: Node) -> Result<Token> { token_from_node(input) }
     fn return_token(input: Node) -> Result<Token> { token_from_node(input) }
     fn extern_token(input: Node) -> Result<Token> { token_from_node(input) }
@@ -49,24 +49,57 @@ impl GeckoParser {
         let span: Span = Span::from_span(input.as_span());
         Ok(Identifier{ span, name: input.as_str().to_owned() })
     }
-    fn integer_decimal(input: Node) -> Result<Integer> {
+    fn integer_decimal(input: Node) -> Result<i128> {
+        Ok(input.as_str().to_owned().parse::<i128>().unwrap())
+    }
+    fn integer(input: Node) -> Result<Integer> {
         let span: Span = Span::from_span(input.as_span());
-        Ok(Integer { span,
-                     value: input.as_str().to_owned() })
+        Ok(match_nodes!(input.into_children();
+            [integer_decimal(decimal)] => Integer{ value: decimal, span }
+        ))
     }
     fn string(input: Node) -> Result<Str> {
         let span: Span = Span::from_span(input.as_span());
         Ok(Str{ span, string: String::from(input.as_str().to_owned()) })
     }
-    fn expression(input: Node) -> Result<Box<dyn Expression>> {
-        let nodes = { input.into_children() };
 
-        // TODO: Implement binary operators with precedence using lazy static
-        // See resources for further details
-        Ok(match_nodes!(nodes;
-                [string(s)] => Box::new(s),
-                [identifier(i)] => Box::new(i),
-                [integer_decimal(i)] => Box::new(i)
+    #[prec_climb(term, PRECCLIMBER)]
+    fn expression(left: Term, op: Node, right: Term) -> Result<Term> {
+        match op.as_rule() {
+            Rule::plus
+                | Rule::minus
+                | Rule::multiply
+                | Rule::divide
+                | Rule::exponent => {
+                let span: Span = Span::from_span(op.as_span());
+                Ok(Term {
+                    node: Box::new(BinaryOperator {
+                        left: left.node,
+                        op: Token { value: op.as_str().to_owned(), span },
+                        right: right.node,
+                        span: Span{ start: left.span.start, end: right.span.end }
+                    }),
+                    span: Span{ start: left.span.start, end: right.span.end }
+                })
+            },
+            r => Err(op.error(format!("Rule {:?} isn't an operator", r)))?
+        }
+    }
+
+    fn term(input: Node) -> Result<Term> {
+        Ok(match_nodes!(input.into_children();
+            [expression(expr)] => {
+                let node_span: Span = expr.span;
+                Term{ node: expr.node, span: node_span }
+            },
+            [identifier(id)] => {
+                let node_span: Span = id.span;
+                Term{ node: Box::new(id), span: node_span }
+            },
+            [integer(int)] => {
+                let node_span: Span = int.span;
+                Term{ node: Box::new(int), span: node_span }
+            },
         ))
     }
 
@@ -169,7 +202,7 @@ impl GeckoParser {
     fn function_definition(input: Node) -> Result<impl node::Node> {
         let span: Span = Span::from_span(input.as_span());
         Ok(match_nodes!(input.into_children();
-            [func_token(func_token), identifier(id), parameter_list(params), output(output), block(block)] => {
+            [proc_token(func_token), identifier(id), parameter_list(params), output(output), block(block)] => {
                 let sig_span = Span{ start: func_token.span.start, end: output.span.end };
                 let sig = Signature{ func_token, id, params, output, span: sig_span };
                 
@@ -179,6 +212,13 @@ impl GeckoParser {
                     span
                 }
             }
+        ))
+    }
+
+    fn expression_statement(input: Node) -> Result<ExpressionStatement> {
+        let span: Span = Span::from_span(input.as_span());
+        Ok(match_nodes!(input.into_children();
+            [expression(expr)] => ExpressionStatement{ expr: expr.node, span }
         ))
     }
 
@@ -220,6 +260,7 @@ impl GeckoParser {
             let rule = node.as_rule();
             match rule {
                 Rule::EOI => {},
+                Rule::expression_statement => statements.push(Box::new(Self::expression_statement(node)?)),
                 Rule::function_definition => statements.push(Box::new(Self::function_definition(node)?)),
                 // Rule::import_statement => statements.push(Box::new(Self::import_statement(node)?)),
                 // Rule::use_statement => statements.push(Box::new(Self::use_statement(node)?)),

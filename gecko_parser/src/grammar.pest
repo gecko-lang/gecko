@@ -21,8 +21,8 @@ small_statement             = _{ type_statement | return_statement | variable_in
 compound_statement          = _{ function_definition | function_declaration }
 
 // Compound Statement Grammars
-function_definition         =  { external? ~ func_token ~ identifier ~ parameter_list ~ output ~ NEWLINE? ~ block }
-function_declaration        =  { external? ~ func_token ~ identifier ~ parameter_list ~ output ~ semicolon }
+function_definition         =  { external? ~ proc_token ~ identifier ~ parameter_list ~ output ~ NEWLINE? ~ block }
+function_declaration        =  { external? ~ proc_token ~ identifier ~ parameter_list ~ output ~ semicolon }
 
 // Small Statement Grammars
 expression_statement        =  { expression }
@@ -33,7 +33,7 @@ variable_declaration        =  { let_token ~ typed_identifier }
 variable_initialisation     =  { let_token ~ typed_identifier ~ equals ~ expression }
 
 // Objects
-output                 =  { rarrow ~ type_specifier }
+output                      =  { rarrow ~ type_specifier }
 
 parameter_list              =  { lparen ~ (parameter ~ ( comma ~ parameter )*)? ~ rparen }
 parameter                   =  { typed_identifier }
@@ -41,11 +41,12 @@ parameter                   =  { typed_identifier }
 typed_identifier_list       = _{ (typed_identifier ~ ( comma ~ typed_identifier )*)? }
 typed_identifier            = _{ identifier ~ colon ~ type_specifier }
 
-variable                    =  { identifier }
+variable                    = _{ identifier }
 
 expression                  =  { infix }
-infix                       = _{ expression_inner ~ (binary_operator ~ expression_inner)* }
-expression_inner            = _{ call | literal | unary | variable }
+infix                       = _{ term ~ (binary_operator ~ term)* }
+term                        =  { call | literal | unary | variable | braced_expression }
+braced_expression           = _{ "(" ~ expression ~ ")" }
 unary                       =  { unary_operator ~ ( literal | variable ) }
 
 literal                     = _{ /* class_constructor | struct_constructor | array | */ byte | string | float | integer | boolean }
@@ -73,10 +74,10 @@ WHITESPACE                  = _{ (" " | "\t" | "\r")+ }
 COMMENT                     = _{ comment_block | comment_line }
 comment_line                = @{ "//" ~ (!"\n" ~ ANY)* }
 comment_block               = @{"/*" ~ (!"*/" ~ ANY)* ~ "*/"}
-keyword                     =  { let_token | func_token | return_token | extern_token | type_token }
+keyword                     =  { let_token | proc_token | return_token | extern_token | type_token }
 
 let_token                   =  { "let" }
-func_token                  =  { "func" }
+proc_token                  =  { "proc" }
 type_token                  =  { "type" }
 return_token                =  { "return" }
 extern_token                =  { "extern" }
@@ -111,6 +112,7 @@ boolean_true                =  { "true" }
 boolean_false               =  { "false" }
 null                        =  { "null" }
 
+logical_not                 =  { "!" }
 exponent                    =  { "**" }
 multiply                    =  { "*" }
 divide                      =  { "/" }
@@ -119,18 +121,17 @@ plus                        =  { "+" }
 minus                       =  { "-" }
 shift_left                  =  { "<<" }
 shift_right                 =  { ">>" }
+bitwise_and                 =  { "&" }
+bitwise_or                  =  { "|" }
+bitwise_xor                 =  { "^" }
 less_than                   =  { "<" }
-less_than_or_equal          =  { "<=" }
 greater_than                =  { ">" }
+less_than_or_equal          =  { "<=" }
 greater_than_or_equal       =  { ">=" }
 not_equal                   =  { "!=" }
 equal                       =  { "==" }
 logical_and                 =  { "&&" }
 logical_or                  =  { "||" }
-logical_not                 =  { "!" }
-bitwise_and                 =  { "&" }
-bitwise_or                  =  { "|" }
-bitwise_xor                 =  { "^" }
 assign                      =  { "=" }
 all_operators               = _{
                                  exponent |
