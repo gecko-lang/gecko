@@ -66,11 +66,26 @@ impl GeckoParser {
     #[prec_climb(term, PRECCLIMBER)]
     fn expression(left: Term, op: Node, right: Term) -> Result<Term> {
         match op.as_rule() {
-            Rule::plus
+            Rule::assign
+                | Rule::logical_or
+                | Rule::logical_and
+                | Rule::equal
+                | Rule::not_equal
+                | Rule::greater_than_or_equal
+                | Rule::less_than_or_equal
+                | Rule::greater_than
+                | Rule::less_than
+                | Rule::bitwise_xor
+                | Rule::bitwise_or
+                | Rule::bitwise_and
+                | Rule::shift_right
+                | Rule::shift_left
+                | Rule::plus
                 | Rule::minus
                 | Rule::multiply
                 | Rule::divide
-                | Rule::exponent => {
+                | Rule::exponent 
+            => {
                 let span: Span = Span::from_span(op.as_span());
                 Ok(Term {
                     node: Box::new(BinaryOperator {
@@ -114,6 +129,7 @@ impl GeckoParser {
                 Rule::lbrace => lb = Some(GeckoParser::lbrace(n).unwrap()),
                 Rule::rbrace => rb = Some(GeckoParser::rbrace(n).unwrap()),
 
+                Rule::expression_statement => stmts.push(Box::new(GeckoParser::expression_statement(n).unwrap())),
                 Rule::function_definition => stmts.push(Box::new(GeckoParser::function_definition(n).unwrap())),
                 _ => {}
             }

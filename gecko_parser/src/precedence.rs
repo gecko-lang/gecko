@@ -32,14 +32,3 @@ fn build_precedence_climber() -> PrecClimber<Rule> {
         Operator::new(Rule::exponent, Assoc::Right),
     ])
 }
-
-// fn build_precedence_climber() -> PrecClimber<Rule> {
-//     PrecClimber::new(vec![
-//         Operator::new(Rule::exponent, Assoc::Left),
-//         Operator::new(Rule::multiply, Assoc::Left)
-//             | Operator::new(Rule::divide, Assoc::Left)
-//             | Operator::new(Rule::modulus, Assoc::Left),
-//         Operator::new(Rule::plus, Assoc::Left)
-//             |Operator::new(Rule::minus, Assoc::Right)
-//     ])
-// }

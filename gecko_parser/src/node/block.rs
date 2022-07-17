@@ -21,6 +21,11 @@ impl Node for Block {
         let mut indent: String = if is_last { (*indent).clone() + "    " } else { (*indent).clone() + "│   " };
 
         output = format!("{}\n{}", output, self.lbrace.display_tree(&mut indent, false));
+
+        for stmt in &self.stmts {
+            output = format!("{}\n{}", output, stmt.display_tree(&mut indent, false));
+        }
+
         output = format!("{}\n{}", output, self.rbrace.display_tree(&mut indent, false));
         output = format!("{}\n{}", output, self.span.display_tree(&mut indent, true));
         output

@@ -2,5 +2,5 @@
 // use std::console;
 
 proc main() -> i32 {
-	// 0;
+	10 - 10;
 }
