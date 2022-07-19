@@ -10,7 +10,7 @@ lazy_static! {
 
 fn build_precedence_climber() -> PrecClimber<Rule> {
     PrecClimber::new(vec![
-        Operator::new(Rule::assign, Assoc::Left),
+        Operator::new(Rule::assignment, Assoc::Left),
         Operator::new(Rule::logical_or, Assoc::Left),
         Operator::new(Rule::logical_and, Assoc::Left),
         Operator::new(Rule::equal, Assoc::Right)

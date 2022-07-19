@@ -1,7 +1,10 @@
 // import <std>, random;
 // use std::console;
 
+let bot: Client;
+
 #[entry]
 proc main() -> i32 {
-	return 2*32 / 8**2;
+	let exit_code := 0;
+	return exit_code;
 }

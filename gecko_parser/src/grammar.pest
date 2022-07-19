@@ -136,7 +136,6 @@ not_equal                   =  { "!=" }
 equal                       =  { "==" }
 logical_and                 =  { "&&" }
 logical_or                  =  { "||" }
-assign                      =  { "=" }
 all_operators               = _{
                                  exponent |
                                  multiply | divide | modulus |
@@ -147,7 +146,7 @@ all_operators               = _{
                                  not_equal | equal |
                                  logical_and | logical_or | logical_not |
                                  bitwise_and | bitwise_or | bitwise_xor |
-                                 assign
+                                 assignment
                                 }
 binary_operator             = _{
                                  exponent |
@@ -162,7 +161,7 @@ binary_operator             = _{
                                }
 unary_operator              = _{ plus | minus | logical_not }
 
-assignment                  =  { equals | "+=" | "-=" | "*=" | "/=" | "%=" }
+assignment                  = _{ equals | "+=" | "-=" | "*=" | "/=" | "%=" }
 equals                      =  { "=" }
 
 star                        =  { "*" }

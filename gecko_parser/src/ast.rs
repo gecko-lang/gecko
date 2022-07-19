@@ -48,6 +48,8 @@ impl GeckoParser {
 
     fn singlequote(input: Node) -> Result<Token> { token_from_node(input) }
     fn doublequote(input: Node) -> Result<Token> { token_from_node(input) }
+
+    fn equals(input: Node) -> Result<Token> { token_from_node(input) }
     //
 
     fn identifier(input: Node) -> Result<Identifier> {
@@ -68,6 +70,10 @@ impl GeckoParser {
     fn boolean_false(input: Node) -> Result<bool> {
         Ok(false)
     }
+    
+    fn integer_zero(input: Node) -> Result<i128> {
+        Ok(0)
+    }
 
     // Decimal identifier. Expands to i128 to handle all possible integers
     fn integer_decimal(input: Node) -> Result<i128> {
@@ -81,7 +87,8 @@ impl GeckoParser {
     fn integer(input: Node) -> Result<Integer> {
         let span: Span = Span::from_span(input.as_span());
         Ok(match_nodes!(input.into_children();
-            [integer_decimal(decimal)] => Integer{ value: decimal, span }
+            [integer_decimal(decimal)] => Integer{ value: decimal, span },
+            [integer_zero(zero)] => Integer{ value: zero, span }
         ))
     }
 
@@ -118,7 +125,7 @@ impl GeckoParser {
     #[prec_climb(term, PRECCLIMBER)]
     fn expression(left: Term, op: Node, right: Term) -> Result<Term> {
         match op.as_rule() {
-            Rule::assign
+            Rule::assignment
                 | Rule::logical_or
                 | Rule::logical_and
                 | Rule::equal
@@ -201,6 +208,8 @@ impl GeckoParser {
 
                 Rule::expression_statement => stmts.push(Box::new(Self::expression_statement(n).unwrap())),
                 Rule::return_statement => stmts.push(Box::new(Self::return_statement(n).unwrap())),
+                Rule::variable_declaration => stmts.push(Box::new(Self::variable_declaration(n).unwrap())),
+                Rule::variable_initialisation => stmts.push(Box::new(Self::variable_initialisation(n).unwrap())),
                 Rule::function_definition => stmts.push(Box::new(Self::function_definition(n).unwrap())),
                 _ => {}
             }
@@ -291,7 +300,11 @@ impl GeckoParser {
         ))
     }
 
-    fn function_definition(input: Node) -> Result<impl node::Node> {
+    //
+    // Statement Nodes
+    //
+
+    fn function_definition(input: Node) -> Result<FunctionDefinition> {
         let span: Span = Span::from_span(input.as_span());
         Ok(match_nodes!(input.into_children();
             [proc_token(func_token), identifier(id), parameter_list(params), output(output), block(block)] => {
@@ -304,6 +317,35 @@ impl GeckoParser {
                     span
                 }
             }
+        ))
+    }
+
+    fn variable_declaration(input: Node) -> Result<VariableDeclaration> {
+        let span: Span = Span::from_span(input.as_span());
+        Ok(match_nodes!(input.into_children();
+            [let_token(let_token), identifier(id), colon(colon), identifier(ty)] => {
+                let ty_span: Span = ty.span;
+                let ty = TypeSpecifier{ id: ty, span: ty_span };
+                
+                VariableDeclaration{ let_token, id, colon, ty, span }
+            }
+        ))
+    }
+
+    fn variable_initialisation(input: Node) -> Result<VariableInitialisation> {
+        let span: Span = Span::from_span(input.as_span());
+        Ok(match_nodes!(input.into_children();
+            [let_token(let_token), identifier(id), colon(colon), identifier(ty), equals(equals), expression(expr)] => {
+                let ty_span: Span = ty.span;
+                let ty = TypeSpecifier{ id: ty, span: ty_span };
+
+                let expr: Box<dyn node::Node> = expr.node;
+                VariableInitialisation{ let_token, id, colon, ty: Some(ty), equals, expr: expr, span }
+            },
+            [let_token(let_token), identifier(id), colon(colon), equals(equals), expression(expr)] => {
+                let expr: Box<dyn node::Node> = expr.node;
+                VariableInitialisation{ let_token, id, colon, ty: None, equals, expr: expr, span }
+            },
         ))
     }
 
@@ -363,6 +405,8 @@ impl GeckoParser {
                 Rule::EOI => {},
                 Rule::expression_statement => statements.push(Box::new(Self::expression_statement(node)?)),
                 Rule::return_statement => statements.push(Box::new(Self::return_statement(node)?)),
+                Rule::variable_declaration => statements.push(Box::new(Self::variable_declaration(node)?)),
+                Rule::variable_initialisation => statements.push(Box::new(Self::variable_initialisation(node)?)),
                 Rule::function_definition => statements.push(Box::new(Self::function_definition(node)?)),
                 // Rule::import_statement => statements.push(Box::new(Self::import_statement(node)?)),
                 // Rule::use_statement => statements.push(Box::new(Self::use_statement(node)?)),
