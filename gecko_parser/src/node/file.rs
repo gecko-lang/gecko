@@ -9,11 +9,6 @@ pub struct File {
     pub span: Option<Span>,
 }
 
-// ├
-// ─
-// └
-// │
-
 impl Node for File {
     fn display_tree(&self, indent: &mut String, _is_last: bool) -> String {
         let mut output: String = format!("{}", "File\n".color("yellow").dimmed());

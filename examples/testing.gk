@@ -20,4 +20,6 @@ class TokenStream impl Stream<std::String> {
 #[entry]
 proc main() -> int {
     stdout << "Hi World";
+
+    let exit: double = 182.3 as double
 }

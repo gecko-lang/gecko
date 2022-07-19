@@ -1,6 +1,7 @@
 // import <std>, random;
 // use std::console;
 
+#[entry]
 proc main() -> i32 {
-	10 - 10;
+	true * false + a ** 8.34;
 }

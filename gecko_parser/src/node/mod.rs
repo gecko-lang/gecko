@@ -22,6 +22,7 @@ pub use term::Term;
 
 pub use crate::colored::*;
 
+ // Trait which all Gecko AST nodes implement
 pub trait Node {
     fn display_tree(&self, indent: &mut String, is_last: bool) -> String;
 }

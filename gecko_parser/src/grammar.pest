@@ -15,7 +15,7 @@ block                       =  { lbrace ~ NEWLINE* ~ statement* ~ rbrace }
 external                    =  { extern_token }
 
 // Statement Types
-statement                   = _{ NEWLINE* ~ ( simple_statement | compound_statement ) ~ NEWLINE* }
+statement                   = _{ NEWLINE* ~ ( simple_statement | compound_statement /**/ | decorator /**/ ) ~ NEWLINE* }
 simple_statement            = _{ small_statement ~ semicolon }
 small_statement             = _{ type_statement | return_statement | variable_initialisation | variable_declaration | expression_statement }
 compound_statement          = _{ function_definition | function_declaration }
@@ -76,6 +76,8 @@ comment_line                = @{ "//" ~ (!"\n" ~ ANY)* }
 comment_block               = @{"/*" ~ (!"*/" ~ ANY)* ~ "*/"}
 keyword                     =  { let_token | proc_token | return_token | extern_token | type_token }
 
+decorator                   =  { "#[" ~ expression ~ "]" }
+
 let_token                   =  { "let" }
 proc_token                  =  { "proc" }
 type_token                  =  { "type" }
@@ -106,7 +108,8 @@ string_delimiter            = _{ "\"" }
 string_unicode              = _{ "u" ~ ('0'..'9' | 'a'..'f' | 'A'..'F'){4} }
 string_escape               = _{ "\\" ~ ("\"" | "\\" | "a" | "b" | "f" | "n" | "r" | "t" | "v" | string_unicode) }
 
-byte                        = @{ singlequote ~ ANY ~ singlequote}
+byte                        =  { singlequote ~ byte_content ~ singlequote}
+byte_content                =  { ANY }
 boolean                     =  { boolean_true | boolean_false }
 boolean_true                =  { "true" }
 boolean_false               =  { "false" }
@@ -164,7 +167,7 @@ equals                      =  { "=" }
 star                        =  { "*" }
 semicolon                   =  { ";" }
 colon                       =  { ":" }
-double_colon                =  { "::" }
+doublecolon                 =  { "::" }
 comma                       =  { "," }
 dot                         =  { "." }
 lbracket                    =  { "[" }

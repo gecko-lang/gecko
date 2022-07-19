@@ -49,7 +49,7 @@ impl Node for Signature {
         let mut indent: String = if is_last { (*indent).clone() + "    " } else { (*indent).clone() + "│   " };
 
         output = format!("{}{}\n", output, self.func_token.display_tree(&mut indent, false));
-        output = format!("{}{}", output, self.id.display_tree(&mut indent, false));
+        output = format!("{}{}\n", output, self.id.display_tree(&mut indent, false));
         output = format!("{}{}\n", output, self.params.display_tree(&mut indent, false));
         output = format!("{}{}\n", output, self.output.display_tree(&mut indent, false));
         output = format!("{}{}\n", output, self.span.display_tree(&mut indent, true));
