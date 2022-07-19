@@ -6,6 +6,6 @@ use std::io;
 
 #[entry]
 proc main() -> int {
-  return 2 * (32/8)**2
+  return 2 * (32/8)**2;
 }
 ```
