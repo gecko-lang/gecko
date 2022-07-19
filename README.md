@@ -2,6 +2,8 @@
 A statically typed, compiled systems programming language with simplicity and intuitiveness in mind
 
 ```rust
+// Hello World
+
 use std::io;
 
 #[entry]
