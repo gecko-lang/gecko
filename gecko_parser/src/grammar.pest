@@ -30,7 +30,7 @@ return_statement            =  { (return_token | larrow) ~ expression }
 type_statement              =  { type_token ~ identifier ~ colon ~ type_specifier }
 
 variable_declaration        =  { let_token ~ typed_identifier }
-variable_initialisation     =  { let_token ~ typed_identifier ~ equals ~ expression }
+variable_initialisation     =  { let_token ~ (typed_identifier | inferred_identifier) ~ equals ~ expression } // Adding a colon and the omission of a type specifier will make compiler attempt to infer the type
 
 // Objects
 output                      =  { rarrow ~ type_specifier }
@@ -40,6 +40,7 @@ parameter                   =  { typed_identifier }
 
 typed_identifier_list       = _{ (typed_identifier ~ ( comma ~ typed_identifier )*)? }
 typed_identifier            = _{ identifier ~ colon ~ type_specifier }
+inferred_identifier         = _{ identifier ~ colon }
 
 variable                    = _{ identifier }
 

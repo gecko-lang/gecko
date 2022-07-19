@@ -3,5 +3,5 @@
 
 #[entry]
 proc main() -> i32 {
-	true * false + a ** 8.34;
+	return 2*32 / 8**2;
 }

@@ -196,11 +196,12 @@ impl GeckoParser {
 
         for n in input.into_children().peekable() {
             match n.as_rule() {
-                Rule::lbrace => lb = Some(GeckoParser::lbrace(n).unwrap()),
-                Rule::rbrace => rb = Some(GeckoParser::rbrace(n).unwrap()),
+                Rule::lbrace => lb = Some(Self::lbrace(n).unwrap()),
+                Rule::rbrace => rb = Some(Self::rbrace(n).unwrap()),
 
-                Rule::expression_statement => stmts.push(Box::new(GeckoParser::expression_statement(n).unwrap())),
-                Rule::function_definition => stmts.push(Box::new(GeckoParser::function_definition(n).unwrap())),
+                Rule::expression_statement => stmts.push(Box::new(Self::expression_statement(n).unwrap())),
+                Rule::return_statement => stmts.push(Box::new(Self::return_statement(n).unwrap())),
+                Rule::function_definition => stmts.push(Box::new(Self::function_definition(n).unwrap())),
                 _ => {}
             }
         }
@@ -306,6 +307,13 @@ impl GeckoParser {
         ))
     }
 
+    fn return_statement(input: Node) -> Result<ReturnStatement> {
+        let span: Span = Span::from_span(input.as_span());
+        Ok(match_nodes!(input.into_children();
+            [return_token(ret), expression(expr)] => ReturnStatement{ return_token: ret, expr: expr.node, span }
+        ))
+    }
+
     fn expression_statement(input: Node) -> Result<ExpressionStatement> {
         let span: Span = Span::from_span(input.as_span());
         Ok(match_nodes!(input.into_children();
@@ -354,6 +362,7 @@ impl GeckoParser {
             match rule {
                 Rule::EOI => {},
                 Rule::expression_statement => statements.push(Box::new(Self::expression_statement(node)?)),
+                Rule::return_statement => statements.push(Box::new(Self::return_statement(node)?)),
                 Rule::function_definition => statements.push(Box::new(Self::function_definition(node)?)),
                 // Rule::import_statement => statements.push(Box::new(Self::import_statement(node)?)),
                 // Rule::use_statement => statements.push(Box::new(Self::use_statement(node)?)),
