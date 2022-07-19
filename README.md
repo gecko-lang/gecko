@@ -1,4 +1,4 @@
-# gecko
+# Gecko Programming Language
 A statically typed, compiled systems programming language with simplicity and intuitiveness in mind
 
 ```rust
