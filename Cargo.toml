@@ -7,11 +7,12 @@ edition = "2021"
 
 [workspace]
 members = [
-  "gecko_parser"
+  "gecko_parser",
+  "gecko_compiler"
 ]
 
 [dependencies]
-colored = "2.0.0"
+gecko_parser = { path = "./gecko_parser" }
+gecko_compiler = { path = "./gecko_compiler" }
 
-[dependencies.gecko_parser]
-path = "./gecko_parser"
+colored = "2.0.0"

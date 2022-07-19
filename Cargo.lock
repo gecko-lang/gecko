@@ -77,6 +77,15 @@ name = "gecko"
 version = "0.1.0"
 dependencies = [
  "colored",
+ "gecko_compiler",
+ "gecko_parser",
+]
+
+[[package]]
+name = "gecko_compiler"
+version = "0.1.0"
+dependencies = [
+ "colored",
  "gecko_parser",
 ]
 
