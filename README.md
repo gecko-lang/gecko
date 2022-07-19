@@ -1,7 +1,7 @@
 # gecko
 A statically typed, compiled systems programming language with simplicity and intuitiveness in mind
 
-```
+```rust
 use std::io;
 
 #[entry]
