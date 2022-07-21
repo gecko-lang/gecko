@@ -4,6 +4,7 @@ use crate::node::ASTNode;
 
 use crate::colored::*;
 
+#[derive(Clone)]
 pub struct Identifier {
     pub name: String,
     pub span: Span

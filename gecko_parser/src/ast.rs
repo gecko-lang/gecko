@@ -76,7 +76,9 @@ impl GeckoParser {
 
     // Decimal identifier. Expands to i128 to handle all possible integers
     fn integer_decimal(input: Node) -> Result<i128> {
-        Ok( match input.as_str().to_owned().parse::<i128>() {
+        Ok( match input.as_str()
+            .to_owned()
+            .parse::<i128>() {
             Ok(int) => int,
             Err(error) => panic!("{:?}", error)
         })
@@ -93,7 +95,9 @@ impl GeckoParser {
 
     fn float(input: Node) -> Result<Float> {
         let span: Span = Span::from_span(input.as_span());
-        Ok( match input.as_str().to_owned().parse::<f64>() {
+        Ok( match input.as_str()
+            .to_owned()
+            .parse::<f64>() {
             Ok(float) => Float { value: float, span },
             Err(error) => panic!{"{:?}", error}
         })
@@ -104,7 +108,9 @@ impl GeckoParser {
         
         Ok(match_nodes!(input.into_children();
             [singlequote(lquote), character, singlequote(rquote)] => {
-                match character.as_str().to_owned().parse::<char>() {
+                match character.as_str()
+                    .to_owned()
+                    .parse::<char>() {
                     Ok(content) => Character{ lquote, value: content as u8, rquote, span },
                     Err(error) => panic!{"{:?}", error}
                 }
@@ -266,7 +272,10 @@ impl GeckoParser {
                         next_param = None;
                     }
                     
-                    rp = Some(Self::rparen(n).unwrap());
+                    rp = Some(
+                        Self::rparen(n)
+                            .unwrap()
+                    );
                 },
                 _ => {}
             }

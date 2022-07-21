@@ -1,9 +1,11 @@
+
 use crate::ast::Span;
 use crate::expression::Expression;
 use crate::node::ASTNode;
 
 use crate::colored::*;
 
+#[derive(Clone)]
 pub struct Boolean {
     pub value: bool,
     pub span: Span
