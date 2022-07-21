@@ -1,6 +1,6 @@
 use crate::ast::Span;
 use crate::statement::Statement;
-use crate::node::{ParameterList, Output, Block, Node};
+use crate::node::{ParameterList, Output, Block, ASTNode};
 use crate::Token;
 
 use crate::expression::Identifier;
@@ -20,7 +20,7 @@ pub struct FunctionDefinition {
 
 impl Statement for FunctionDefinition {}
 
-impl Node for FunctionDefinition {
+impl ASTNode for FunctionDefinition {
     fn display_tree(&self, indent: &mut String, is_last: bool) -> String {
         let marker = if is_last { String::from("└──") } else { String::from("├──") };
         let mut output: String = format!("{}{}{}\n", indent, marker, "FunctionDefinition".color("red").dimmed());
@@ -42,7 +42,7 @@ pub struct Signature {
     pub span: Span,
 }
 
-impl Node for Signature {
+impl ASTNode for Signature {
     fn display_tree(&self, indent: &mut String, is_last: bool) -> String {
         let marker = if is_last { String::from("└──") } else { String::from("├──") };
         let mut output: String = format!("{}{}{}\n", indent, marker, "Signature");

@@ -100,13 +100,13 @@ impl GeckoParser {
         })
     }
 
-    fn byte(input: Node) -> Result<Byte> {
+    fn character(input: Node) -> Result<Character> {
         let span: Span = Span::from_span(input.as_span());
         
         Ok(match_nodes!(input.into_children();
-            [singlequote(lquote), byte, singlequote(rquote)] => {
-                match byte.as_str().to_owned().parse::<char>() {
-                    Ok(content) => Byte{ lquote, value: content as u8, rquote, span },
+            [singlequote(lquote), character, singlequote(rquote)] => {
+                match character.as_str().to_owned().parse::<char>() {
+                    Ok(content) => Character{ lquote, value: content as u8, rquote, span },
                     Err(error) => panic!{"{:?}", error}
                 }
             }
@@ -147,12 +147,12 @@ impl GeckoParser {
             => {
                 let span: Span = Span::from_span(op.as_span());
                 Ok(Term {
-                    node: Box::new(BinaryOperator {
+                    node: Box::new(NodeType::BinaryOperator(BinaryOperator {
                         left: left.node,
                         op: Token { value: op.as_str().to_owned(), span },
                         right: right.node,
                         span: Span{ start: left.span.start, end: right.span.end }
-                    }),
+                    })),
                     span: Span{ start: left.span.start, end: right.span.end }
                 })
             },
@@ -169,27 +169,27 @@ impl GeckoParser {
             },
             [identifier(id)] => {
                 let node_span: Span = id.span;
-                Term{ node: Box::new(id), span: node_span }
+                Term{ node: Box::new(NodeType::Identifier(id)), span: node_span }
             },
             [integer(int)] => {
                 let node_span: Span = int.span;
-                Term{ node: Box::new(int), span: node_span }
+                Term{ node: Box::new(NodeType::Integer(int)), span: node_span }
             },
-            [byte(b)] => {
-                let node_span: Span = b.span;
-                Term{ node: Box::new(b), span: node_span }
+            [character(c)] => {
+                let node_span: Span = c.span;
+                Term{ node: Box::new(NodeType::Character(c)), span: node_span }
             },
             [string(s)] => {
                 let node_span: Span = s.span;
-                Term{ node: Box::new(s), span: node_span }
+                Term{ node: Box::new(NodeType::Str(s)), span: node_span }
             },
             [float(float)] => {
                 let node_span: Span = float.span;
-                Term{ node: Box::new(float), span: node_span }
+                Term{ node: Box::new(NodeType::Float(float)), span: node_span }
             },
             [boolean(boolean)] => {
                 let node_span: Span = boolean.span;
-                Term{ node: Box::new(boolean), span: node_span }
+                Term{ node: Box::new(NodeType::Boolean(boolean)), span: node_span }
             }
         ))
     }
@@ -198,7 +198,7 @@ impl GeckoParser {
     fn block(input: Node) -> Result<Block> {
         let span: Span = Span::from_span(input.as_span());
         let mut lb: Option<Token> = None;
-        let mut stmts: Vec<Box<dyn node::Node>> = vec!();
+        let mut stmts: Vec<Box<NodeType>> = vec!();
         let mut rb: Option<Token> = None;
 
         for n in input.into_children().peekable() {
@@ -206,11 +206,11 @@ impl GeckoParser {
                 Rule::lbrace => lb = Some(Self::lbrace(n).unwrap()),
                 Rule::rbrace => rb = Some(Self::rbrace(n).unwrap()),
 
-                Rule::expression_statement => stmts.push(Box::new(Self::expression_statement(n).unwrap())),
-                Rule::return_statement => stmts.push(Box::new(Self::return_statement(n).unwrap())),
-                Rule::variable_declaration => stmts.push(Box::new(Self::variable_declaration(n).unwrap())),
-                Rule::variable_initialisation => stmts.push(Box::new(Self::variable_initialisation(n).unwrap())),
-                Rule::function_definition => stmts.push(Box::new(Self::function_definition(n).unwrap())),
+                Rule::expression_statement => stmts.push(Box::new(NodeType::Expression(Self::expression_statement(n).unwrap()))),
+                Rule::return_statement => stmts.push(Box::new(NodeType::Return(Self::return_statement(n).unwrap()))),
+                Rule::variable_declaration => stmts.push(Box::new(NodeType::VariableDeclaration(Self::variable_declaration(n).unwrap()))),
+                Rule::variable_initialisation => stmts.push(Box::new(NodeType::VariableInitialisation(Self::variable_initialisation(n).unwrap()))),
+                Rule::function_definition => stmts.push(Box::new(NodeType::FunctionDefinition(Self::function_definition(n).unwrap()))),
                 _ => {}
             }
         }
@@ -251,13 +251,13 @@ impl GeckoParser {
         for n in input.into_children().peekable() {
             match n.as_rule() {
                 Rule::lparen => {
-                    lp = Some(GeckoParser::lparen(n).unwrap());
+                    lp = Some(Self::lparen(n).unwrap());
                 },
                 Rule::parameter => {
-                    next_param = Some(GeckoParser::parameter(n).unwrap());
+                    next_param = Some(Self::parameter(n).unwrap());
                 },
                 Rule::comma => {
-                    params.push((next_param.unwrap(), Some(GeckoParser::comma(n).unwrap())));
+                    params.push((next_param.unwrap(), Some(Self::comma(n).unwrap())));
                     next_param = None;
                 },
                 Rule::rparen => {
@@ -267,7 +267,7 @@ impl GeckoParser {
                         next_param = None;
                     }
                     
-                    rp = Some(GeckoParser::rparen(n).unwrap());
+                    rp = Some(Self::rparen(n).unwrap());
                 },
                 _ => {}
             }
@@ -339,11 +339,11 @@ impl GeckoParser {
                 let ty_span: Span = ty.span;
                 let ty = TypeSpecifier{ id: ty, span: ty_span };
 
-                let expr: Box<dyn node::Node> = expr.node;
+                let expr: Box<NodeType> = expr.node;
                 VariableInitialisation{ let_token, id, colon, ty: Some(ty), equals, expr: expr, span }
             },
             [let_token(let_token), identifier(id), colon(colon), equals(equals), expression(expr)] => {
-                let expr: Box<dyn node::Node> = expr.node;
+                let expr: Box<NodeType> = expr.node;
                 VariableInitialisation{ let_token, id, colon, ty: None, equals, expr: expr, span }
             },
         ))
@@ -396,18 +396,18 @@ impl GeckoParser {
     fn file(input: Node) -> Result<File> {
         let span: Span = Span::from_span(input.as_span());
         let nodes = { input.into_children() };
-        let mut statements: Vec<Box<dyn node::Node>> = Vec::new();
+        let mut statements: Vec<Box<NodeType>> = Vec::new();
         for node in nodes {
             let rule = node.as_rule();
 
             // Match and build all Statements
             match rule {
                 Rule::EOI => {},
-                Rule::expression_statement => statements.push(Box::new(Self::expression_statement(node)?)),
-                Rule::return_statement => statements.push(Box::new(Self::return_statement(node)?)),
-                Rule::variable_declaration => statements.push(Box::new(Self::variable_declaration(node)?)),
-                Rule::variable_initialisation => statements.push(Box::new(Self::variable_initialisation(node)?)),
-                Rule::function_definition => statements.push(Box::new(Self::function_definition(node)?)),
+                Rule::expression_statement => statements.push(Box::new(NodeType::Expression(Self::expression_statement(node)?))),
+                Rule::return_statement => statements.push(Box::new(NodeType::Return(Self::return_statement(node)?))),
+                Rule::variable_declaration => statements.push(Box::new(NodeType::VariableDeclaration(Self::variable_declaration(node)?))),
+                Rule::variable_initialisation => statements.push(Box::new(NodeType::VariableInitialisation(Self::variable_initialisation(node)?))),
+                Rule::function_definition => statements.push(Box::new(NodeType::FunctionDefinition(Self::function_definition(node)?))),
                 // Rule::import_statement => statements.push(Box::new(Self::import_statement(node)?)),
                 // Rule::use_statement => statements.push(Box::new(Self::use_statement(node)?)),
                 _ => {}

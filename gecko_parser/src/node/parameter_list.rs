@@ -1,6 +1,6 @@
 
 use crate::ast::Span;
-use crate::node::{Parameter, Node};
+use crate::node::{Parameter, ASTNode};
 use crate::Token;
 
 use crate::colored::*;
@@ -12,7 +12,7 @@ pub struct ParameterList {
     pub span: Span
 }
 
-impl Node for ParameterList {
+impl ASTNode for ParameterList {
     fn display_tree(&self, indent: &mut String, is_last: bool) -> String {
         let marker = if is_last { String::from("└──") } else { String::from("├──") };
         let mut output: String = format!("{}{}{}\n", indent, marker, "ParameterList".color("yellow").dimmed());

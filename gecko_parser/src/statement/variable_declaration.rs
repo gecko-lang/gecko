@@ -1,7 +1,7 @@
 
 use crate::ast::Span;
 use crate::statement::Statement;
-use crate::node::{Node, TypeSpecifier};
+use crate::node::{ASTNode, TypeSpecifier};
 use crate::expression::Identifier;
 use crate::Token;
 
@@ -17,7 +17,7 @@ pub struct VariableDeclaration {
 
 impl Statement for VariableDeclaration {}
 
-impl Node for VariableDeclaration {
+impl ASTNode for VariableDeclaration {
     fn display_tree(&self, indent: &mut String, is_last: bool) -> String {
         let marker = if is_last { String::from("└──") } else { String::from("├──") };
         let mut output: String = format!("{}{}{}\n", indent, marker, "VariableDeclaration".color("red").dimmed());

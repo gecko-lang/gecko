@@ -6,6 +6,9 @@ extern crate lazy_static;
 extern crate pest_derive;
 extern crate pest;
 
+#[macro_use]
+extern crate enum_dispatch;
+
 extern crate colored;
 
 pub mod ast;

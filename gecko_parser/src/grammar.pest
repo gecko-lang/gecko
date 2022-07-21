@@ -46,11 +46,12 @@ variable                    = _{ identifier }
 
 expression                  =  { infix }
 infix                       = _{ term ~ (binary_operator ~ term)* }
-term                        =  { call | literal | unary | variable | braced_expression }
+term                        =  { call | literal | unary | variable | braced_expression /*| cast*/ }
 braced_expression           = _{ "(" ~ expression ~ ")" }
 unary                       =  { unary_operator ~ ( literal | variable ) }
 
-literal                     = _{ /* class_constructor | struct_constructor | array | */ byte | string | float | integer | boolean }
+literal                     = _{ /* class_constructor | struct_constructor | array | */ character | string | float | integer | boolean }
+//cast                        =  { expression ~ as_token ~ type_specifier }
 
 // TODO: dotted and scopes
 // dotted                      =  { identifier }
@@ -79,6 +80,7 @@ keyword                     =  { let_token | proc_token | return_token | extern_
 
 decorator                   =  { "#[" ~ expression ~ "]" }
 
+as_token                    =  { "as" }
 let_token                   =  { "let" }
 proc_token                  =  { "proc" }
 type_token                  =  { "type" }
@@ -109,8 +111,8 @@ string_delimiter            = _{ "\"" }
 string_unicode              = _{ "u" ~ ('0'..'9' | 'a'..'f' | 'A'..'F'){4} }
 string_escape               = _{ "\\" ~ ("\"" | "\\" | "a" | "b" | "f" | "n" | "r" | "t" | "v" | string_unicode) }
 
-byte                        =  { singlequote ~ byte_content ~ singlequote}
-byte_content                =  { ANY }
+character                   =  { singlequote ~ character_content ~ singlequote}
+character_content           =  { ANY }
 boolean                     =  { boolean_true | boolean_false }
 boolean_true                =  { "true" }
 boolean_false               =  { "false" }

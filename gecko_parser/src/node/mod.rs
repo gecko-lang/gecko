@@ -1,4 +1,3 @@
-
 pub mod block;
 pub use block::Block;
 
@@ -22,7 +21,37 @@ pub use term::Term;
 
 pub use crate::colored::*;
 
- // Trait which all Gecko AST nodes implement
-pub trait Node {
+use crate::{Token, expression, node, statement};
+
+#[enum_dispatch]
+pub enum NodeType {
+    Token(Token),
+
+    BinaryOperator(expression::BinaryOperator),
+    Boolean(expression::Boolean),
+    Character(expression::Character),
+    Float(expression::Float),
+    Integer(expression::Integer),
+    Identifier(expression::Identifier),
+    Str(expression::Str),
+    
+    Block(node::Block),
+    File(node::File),
+    Output(node::Output),
+    ParameterList(node::ParameterList),
+    Parameter(node::Parameter),
+    Term(node::Term),
+    TypeSpecifier(node::TypeSpecifier),
+
+    Expression(statement::ExpressionStatement),
+    FunctionDefinition(statement::FunctionDefinition),
+    Return(statement::ReturnStatement),
+    VariableDeclaration(statement::VariableDeclaration),
+    VariableInitialisation(statement::VariableInitialisation),
+}
+
+// Trait which all Gecko AST nodes implement
+#[enum_dispatch(NodeType)]
+pub trait ASTNode {
     fn display_tree(&self, indent: &mut String, is_last: bool) -> String;
 }

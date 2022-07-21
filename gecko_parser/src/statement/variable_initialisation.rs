@@ -1,7 +1,7 @@
 
 use crate::ast::Span;
 use crate::statement::Statement;
-use crate::node::{Node, TypeSpecifier};
+use crate::node::{ASTNode, NodeType, TypeSpecifier};
 use crate::expression::Identifier;
 use crate::Token;
 
@@ -13,13 +13,13 @@ pub struct VariableInitialisation {
     pub colon: Token,
     pub ty: Option<TypeSpecifier>,
     pub equals: Token,
-    pub expr: Box<dyn Node>,
+    pub expr: Box<NodeType>,
     pub span: Span
 }
 
 impl Statement for VariableInitialisation {}
 
-impl Node for VariableInitialisation {
+impl ASTNode for VariableInitialisation {
     fn display_tree(&self, indent: &mut String, is_last: bool) -> String {
         let marker = if is_last { String::from("└──") } else { String::from("├──") };
         let mut output: String = format!("{}{}{}\n", indent, marker, "VariableInitialisation".color("red").dimmed());
