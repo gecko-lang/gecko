@@ -3,7 +3,6 @@ use crate::grammar::{GeckoParser, Rule};
 use crate::expression::*;
 use crate::statement::*;
 use crate::node::*;
-use crate::node;
 use crate::Token;
 
 use crate::colored::*;

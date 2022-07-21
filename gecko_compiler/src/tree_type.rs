@@ -27,9 +27,39 @@ pub struct Type {
     ty: FundamentalType
 }
 
-#[enum_dispatch(NodeType)]
 pub trait TypeCheck {
     fn check(&self) -> Result<Type, TypeError>;
+}
+
+impl TypeCheck for NodeType {
+    fn check(&self) -> Result<Type, TypeError> {
+        use NodeType::*;
+        match self {
+            Token(token) => token.check(),
+
+            BinaryOperator(binary_operator) => binary_operator.check(),
+            Boolean(boolean) => boolean.check(),
+            Character(character) => character.check(),
+            Float(float) => float.check(),
+            Integer(integer) => integer.check(),
+            Identifier(identifier) => identifier.check(),
+            Str(string) => string.check(),
+
+            Block(block) => block.check(),
+            File(file) => file.check(),
+            Output(output) => output.check(),
+            ParameterList(parameter_list) => parameter_list.check(),
+            Parameter(parameter) => parameter.check(),
+            Term(term) => term.check(),
+            TypeSpecifier(type_specifier) => type_specifier.check(),
+
+            Expression(expression) => expression.check(),
+            FunctionDefinition(function_definition) => function_definition.check(),
+            Return(return_statement) => return_statement.check(),
+            VariableDeclaration(variable_declaration) => variable_declaration.check(),
+            VariableInitialisation(variable_initialisation) => variable_initialisation.check()
+        }
+    }
 }
 
 impl TypeCheck for Token {
@@ -205,6 +235,6 @@ impl TypeCheck for statement::VariableInitialisation {
     }
 }
 
-pub fn annotate_file(tree: node::File) -> Result<Option<node::File>, TypeError> {
+pub fn annotate_file(_tree: node::File) -> Result<Option<node::File>, TypeError> {
     Ok(None)
 }
