@@ -19,8 +19,11 @@ impl ASTNode for ParameterList {
         let mut indent: String = if is_last { (*indent).clone() + "    " } else { (*indent).clone() + "│   " };
 
         output = format!("{}{}\n", output, self.lparen.display_tree(&mut indent, false));
-        //output = format!("{}\n{}", output, self.parameters.display_tree(indent, false));
+        for (param, _) in &self.parameters {
+            output = format!("{}{}\n", output, param.display_tree(&mut indent, false));
+        }
         output = format!("{}{}\n", output, self.rparen.display_tree(&mut indent, false));
+
         output = format!("{}{}", output, self.span.display_tree(&mut indent, true));
         output
     }

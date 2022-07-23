@@ -118,6 +118,7 @@ boolean_true                =  { "true" }
 boolean_false               =  { "false" }
 null                        =  { "null" }
 
+cast                        =  { "as" }
 logical_not                 =  { "!" }
 exponent                    =  { "**" }
 multiply                    =  { "*" }
@@ -139,7 +140,7 @@ equal                       =  { "==" }
 logical_and                 =  { "&&" }
 logical_or                  =  { "||" }
 all_operators               = _{
-                                 exponent |
+                                 cast | exponent |
                                  multiply | divide | modulus |
                                  plus | minus |
                                  shift_left | shift_right |
@@ -151,7 +152,7 @@ all_operators               = _{
                                  assignment
                                 }
 binary_operator             = _{
-                                 exponent |
+                                 cast | exponent |
                                  multiply | divide | modulus |
                                  plus | minus |
                                  shift_left | shift_right |

@@ -4,10 +4,16 @@ use crate::node::ASTNode;
 
 use crate::colored::*;
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct Identifier {
     pub name: String,
     pub span: Span
+}
+
+impl Identifier {
+    pub fn equals(&self, id: &Identifier) -> bool {
+        if self.name == id.name {true} else {false}
+    }
 }
 
 impl Expression for Identifier {}

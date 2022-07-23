@@ -1,12 +1,14 @@
 
 use std::{fmt, error::Error};
 
-#[derive(Debug)]
-pub struct TypeError;
+#[derive(Debug, Clone)]
+pub struct TypeError {
+    pub text: String,
+}
 
 impl fmt::Display for TypeError {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt.write_str("Parse Error: Invalid parse")
+        fmt.write_str(format!("TypeError: {}", self.text).as_str())
     }
 }
 

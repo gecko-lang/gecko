@@ -149,6 +149,7 @@ impl GeckoParser {
                 | Rule::multiply
                 | Rule::divide
                 | Rule::exponent 
+                | Rule::cast
             => {
                 let span: Span = Span::from_span(op.as_span());
                 Ok(Term {
@@ -266,11 +267,9 @@ impl GeckoParser {
                     next_param = None;
                 },
                 Rule::rparen => {
-                    if params.len() > 0 {
-                        assert_eq!(next_param.is_none(), false);
-                        params.push((next_param.unwrap(), None));
-                        next_param = None;
-                    }
+                    assert_eq!(next_param.is_none(), false);
+                    params.push((next_param.unwrap(), None));
+                    next_param = None;
                     
                     rp = Some(
                         Self::rparen(n)
@@ -426,7 +425,7 @@ impl GeckoParser {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct LineColumn {
     line: usize,
     column: usize
@@ -445,7 +444,7 @@ impl LineColumn {
 }
 
 // Used to store location of AST Nodes and Tokens
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct Span {
     start: LineColumn,
     end: LineColumn

@@ -1,1 +1,5 @@
-10 + 5 * (a / 4);
+
+proc main(argc: int) -> int {
+    let some: float = (argc + 2) as int as float;
+    some / 3;
+}

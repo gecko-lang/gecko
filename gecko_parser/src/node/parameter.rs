@@ -20,9 +20,9 @@ impl ASTNode for Parameter {
         let mut output: String = format!("{}{}{}\n", indent, marker, "Parameter".color("yellow").dimmed());
         let mut indent: String = if is_last { (*indent).clone() + "    " } else { (*indent).clone() + "│   " };
 
-        output = format!("{}{}", output, self.id.display_tree(&mut indent, false));
-        output = format!("{}{}", output, self.colon_token.display_tree(&mut indent, false));
-        output = format!("{}{}", output, self.ty.display_tree(&mut indent, false));
+        output = format!("{}{}\n", output, self.id.display_tree(&mut indent, false));
+        output = format!("{}{}\n", output, self.colon_token.display_tree(&mut indent, false));
+        output = format!("{}{}\n", output, self.ty.display_tree(&mut indent, false));
         output = format!("{}{}", output, self.span.display_tree(&mut indent, true));
         output
     }

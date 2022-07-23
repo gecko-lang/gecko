@@ -1,0 +1,4 @@
+{
+    "rust-client.channel": "default",
+    "rust-analyzer.diagnostics.disabled": ["unresolved-proc-macro", "macro-error"]
+}

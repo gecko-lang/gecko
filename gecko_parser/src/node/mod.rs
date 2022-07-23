@@ -21,7 +21,12 @@ pub use term::Term;
 
 pub use crate::colored::*;
 
-use crate::{Token, expression, node, statement};
+use crate::{
+    Token,
+    expression,
+    node,
+    statement,
+};
 
 #[enum_dispatch]
 pub enum NodeType {
@@ -42,6 +47,7 @@ pub enum NodeType {
     Parameter(node::Parameter),
     Term(node::Term),
     TypeSpecifier(node::TypeSpecifier),
+    Signature(statement::function_definition::Signature),
 
     Expression(statement::ExpressionStatement),
     FunctionDefinition(statement::FunctionDefinition),

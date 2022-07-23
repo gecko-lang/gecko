@@ -4,7 +4,7 @@ use gecko_parser::{
     ast::parse_gecko,
     node::ASTNode
 };
-//use gecko_compiler::tree_type::annotate_file;
+use gecko_compiler::tree_type::annotate_file;
 use std::{env, fs};
 
 fn main() {
@@ -29,10 +29,12 @@ fn main() {
             println!("Successfully constructed AST.");
 
             let mut indent: String = String::from("");
-            println!("{}", file.unwrap().display_tree(&mut indent, true));
+            let file = file.unwrap();
+            println!("{}", (&file).display_tree(&mut indent, true));
 
             // Type check & annotate tree
-
+            annotate_file(&file)
+                .unwrap();
         },
         Err(e) => println!("Parsing Unsuccessful: \n {:?}", e)
     }
