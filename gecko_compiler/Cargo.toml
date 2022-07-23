@@ -11,6 +11,7 @@ crate-type = ["lib"]
 [dependencies]
 gecko_parser = { path = "../gecko_parser" }
 
+cranelift = "0.85.1"
 cranelift-frontend = "0.85.1"
 cranelift-codegen = "0.85.1"
 enum_dispatch = "0.3.8"

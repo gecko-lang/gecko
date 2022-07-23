@@ -4,7 +4,10 @@ use gecko_parser::{
     ast::parse_gecko,
     node::ASTNode
 };
-use gecko_compiler::tree_type::annotate_file;
+use gecko_compiler::{
+    tree_type::annotate_file,
+    codegen::generate_ir
+};
 use std::{env, fs};
 
 fn main() {
@@ -33,8 +36,10 @@ fn main() {
             println!("{}", (&file).display_tree(&mut indent, true));
 
             // Type check & annotate tree
-            annotate_file(&file)
+            let symbols = annotate_file(&file)
                 .unwrap();
+
+            generate_ir(&file, symbols.1);
         },
         Err(e) => println!("Parsing Unsuccessful: \n {:?}", e)
     }

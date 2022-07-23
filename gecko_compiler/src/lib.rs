@@ -2,6 +2,8 @@ extern crate gecko_parser;
 
 pub mod tree_type;
 pub mod symbol;
+pub mod codegen;
+
 pub mod error;
 
 pub use tree_type::Type;

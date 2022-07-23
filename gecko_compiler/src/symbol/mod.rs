@@ -1,21 +1,23 @@
 use std::collections::HashMap;
 
 pub mod variable;
+pub mod function;
 pub use variable::*;
+pub use function::*;
 
 use gecko_parser::{
     expression::Identifier,
-    statement::function_definition::Signature
+    statement::function_definition::Signature,
 };
 use crate::{
-    Type, 
+    Type,
     error::TypeError
 };
 
 #[derive(Clone)]
 pub enum Symbol {
     Variable(Variable),
-    //Function(symbols::Function)
+    Function(Function)
 }
 
 #[derive(Clone)]
@@ -46,7 +48,7 @@ impl SymbolTable {
                         }
                         return Ok(variable.ty.clone());
                     },
-                _ => return Err(TypeError{ text: format!("'{}' is not a variable", name)})
+                    _ => return Err(TypeError{ text: format!("'{}', is not a variable", id.name)})
                 }
             }
         }
@@ -54,7 +56,8 @@ impl SymbolTable {
         Err(TypeError{ text: format!("The variable '{}' does not exist", id.name)})
     }
 
-    pub fn define_function(&mut self, id: &Identifier, sig: Signature) {
-        // let symbol: Symbol = Symbol::Variable(Variable::new(true, id.clone(), ty));
+    pub fn define_function(&mut self, id: &Identifier, params: Vec<(String, Type)>, output: Type) {
+        let symbol: Symbol = Symbol::Function(Function::new(true, id.clone(), params, output));
+        self.symbols.insert(id.name.clone(), symbol);
     }
 }

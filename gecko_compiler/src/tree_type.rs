@@ -346,8 +346,13 @@ impl TypeCheck for statement::FunctionDefinition {
 
         self.sig.check(symbol_table)
             .unwrap();
+        // TODO: Handle checking of params and output of function signature
+        //       within this function so that all the types can be added to
+        //       the symbol table entry.
+
         self.block.check(symbol_table)
             .unwrap();
+
         Ok(None)
     }
 }
@@ -395,11 +400,13 @@ impl TypeCheck for statement::VariableInitialisation {
     }
 }
 
-pub fn annotate_file(tree: &node::File) -> Result<Option<node::File>, TypeError> {
+pub fn annotate_file(tree: &node::File) -> Result<(Option<node::File>, SymbolTable), TypeError> {
     let mut symbol_table: &mut SymbolTable = &mut SymbolTable{ symbols: HashMap::new() };
     
     tree.check(&mut symbol_table)
         .unwrap();
-    Ok(None)    // Have to work out how to go about annotating the original AST and returning that
-                // instead of just checking types 
+    Ok((None, symbol_table.clone()))
+
+        // Have to work out how to go about annotating the original AST and returning that
+        // instead of just checking types 
 }

@@ -1,15 +1,26 @@
 
-// use gecko_parser::expression::Identifier;
+use gecko_parser::expression::Identifier;
 
-// use crate::Type;
+use crate::Type;
 
-// pub struct Variable {
-//     id: Identifier;
-//     ty: Option<Type>;
-// }
+#[derive(Clone)]
+pub struct Function {
+    id: Identifier,
+    params: Vec<(String, Type)>,
+    output: Type,
 
-// impl Variable {
-//     fn is_initialised() _> bool {
-//         !self.ty.is_none()
-//     }
-// }
+    body: bool,
+}
+
+impl Function {
+    pub fn new(body: bool, id: Identifier, params: Vec<(String, Type)>, output: Type) -> Self {
+        Self{ body, id, output, params }
+    }
+
+    pub fn define(&mut self) {
+        self.body = true;
+    }
+    pub fn has_body(&self) -> bool {
+        self.body
+    }
+}
